@@ -5,7 +5,8 @@ import {
     Body,
     Param,
     Put,
-    Delete
+    Delete,
+    Logger
   } from '@nestjs/common';
   import { UserService } from './user.service';
   import { CreateUserDto } from './dto/create-user.dto';
@@ -15,38 +16,75 @@ import { PaginationResult } from 'src/common/utils/baseRepository';
   
   @Controller('users')
   export class UserController {
+    private readonly logger = new Logger(UserController.name);
+
     constructor(private readonly userService: UserService) {}
   
-    // CREATE
     @Post()
-    async create(@Body() dados: CreateUserDto): Promise<User> {
-      return this.userService.createUser(dados);
+    async create(@Body() data: CreateUserDto): Promise<User> {
+      this.logger.log(`Criando novo usuário: ${JSON.stringify(data)}`);
+      try {
+        const result = await this.userService.createUser(data);
+        this.logger.log(`Usuário criado com sucesso: ${result.id}`);
+        return result;
+      } catch (error) {
+        this.logger.error(`Erro ao criar usuário: ${error.message}`, error.stack);
+        throw error;
+      }
     }
   
-    // GET ALL
     @Get()
     async findAll(): Promise<PaginationResult<User>> {
-      return this.userService.getAll();
+      this.logger.log('Buscando todos os usuários');
+      try {
+        const result = await this.userService.getAll();
+        this.logger.log(`Total de usuários encontrados: ${result.total}`);
+        return result;
+      } catch (error) {
+        this.logger.error(`Erro ao buscar usuários: ${error.message}`, error.stack);
+        throw error;
+      }
     }
   
-    // GET BY ID
     @Get(':id')
     async findOne(@Param('id') id: string): Promise<User> {
-      return this.userService.getById(id);
+      this.logger.log(`Buscando usuário por ID: ${id}`);
+      try {
+        const result = await this.userService.getById(id);
+        this.logger.log(`Usuário encontrado: ${result.id}`);
+        return result;
+      } catch (error) {
+        this.logger.error(`Erro ao buscar usuário ${id}: ${error.message}`, error.stack);
+        throw error;
+      }
     }
   
-    // UPDATE COMPLETO (PUT)
+   
     @Put(':id')
     async update(
       @Param('id') id: string,
-      @Body() dados: UpdateUserDto
+      @Body() data: UpdateUserDto
     ): Promise<User> {
-      return this.userService.updateUser(id, dados);
+      this.logger.log(`Atualizando usuário ${id} com dados: ${JSON.stringify(data)}`);
+      try {
+        const result = await this.userService.updateUser(id, data);
+        this.logger.log(`Usuário ${id} atualizado com sucesso`);
+        return result;
+      } catch (error) {
+        this.logger.error(`Erro ao atualizar usuário ${id}: ${error.message}`, error.stack);
+        throw error;
+      }
     }
   
-    // DELETE REAL
     @Delete(':id')
     async remove(@Param('id') id: string): Promise<void> {
-      return this.userService.deleteUser(id);
+      this.logger.log(`Removendo usuário: ${id}`);
+      try {
+        await this.userService.deleteUser(id);
+        this.logger.log(`Usuário ${id} removido com sucesso`);
+      } catch (error) {
+        this.logger.error(`Erro ao remover usuário ${id}: ${error.message}`, error.stack);
+        throw error;
+      }
     }
   }
