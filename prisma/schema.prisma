@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  TRIAL
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(MEMBER)
+
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  leads         Lead[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+}
+
+model Organization {
+  id            String    @id @default(uuid())
+  name          String
+  slug          String    @unique
+
+  users         User[]
+  leads         Lead[]
+
+  subscription  Subscription?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+}
+
+model Plan {
+  id            String    @id @default(uuid())
+  name          PlanType  @unique
+  price         Float
+  description   String?
+
+  subscriptions Subscription[]
+
+  createdAt     DateTime @default(now())
+}
+
+model Subscription {
+  id              String              @id @default(uuid())
+  organizationId  String              @unique
+  organization    Organization        @relation(fields: [organizationId], references: [id])
+
+  planId          String
+  plan            Plan                @relation(fields: [planId], references: [id])
+
+  status          SubscriptionStatus  @default(TRIAL)
+  startDate       DateTime            @default(now())
+  endDate         DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Lead {
+  id              String   @id @default(uuid())
+  name            String
+  email           String
+  phone           String?
+
+  organizationId  String
+  organization    Organization @relation(fields: [organizationId], references: [id])
+
+  userId          String?
+  user            User? @relation(fields: [userId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+}
