@@ -18,3 +18,14 @@ export class CreateSubscriptionDto {
   @IsDate()
   endDate?: Date;
 }
+
+export class UpdateSubscriptionDto {
+  @IsEnum(SubscriptionStatus)
+  @IsOptional()
+  status?: SubscriptionStatus;
+
+  @Type(() => Date)
+  @IsOptional()
+  @IsDate()
+  endDate?: Date;
+}
