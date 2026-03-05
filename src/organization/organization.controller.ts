@@ -5,61 +5,34 @@ import { UpdateOrganizationDto } from './dto/create-organization.dto';
 
 @Controller('organization')
 export class OrganizationController {
-  private readonly logger = new Logger(OrganizationController.name);
-  
   constructor(private readonly organizationService: OrganizationService) {}
 
   @Post()
-  async create(@Body() createOrganizationDto: CreateOrganizationDto) {
-    this.logger.log(`Criando organização: ${createOrganizationDto.name}`);
-    const result = await this.organizationService.createOrganization(createOrganizationDto);
-    return {
-      success: true,
-      data: result,
-      message: 'Organização criada com sucesso'
-    };
+  async create(@Body() dto: CreateOrganizationDto) {
+    return this.organizationService.createOrganization(dto);
   }
 
   @Get()
   async findAll() {
-    this.logger.log('Listando todas as organizações');
-    const result = await this.organizationService.findAll();
-    return {
-      success: true,
-      data: result,
-      message: 'Organizações listadas com sucesso'
-    };
+    return this.organizationService.findAll();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    this.logger.log(`Buscando organização: ${id}`);
-    const result = await this.organizationService.findOne(id);
-    return {
-      success: true,
-      data: result,
-      message: 'Organização encontrada com sucesso'
-    };
+    return this.organizationService.findOne(id);
   }
 
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateOrganizationDto: UpdateOrganizationDto
+    @Body() dto: UpdateOrganizationDto,
   ) {
-    this.logger.log(`Atualizando organização: ${id}`);
-    const result = await this.organizationService.updateOrganization(id, updateOrganizationDto);
-    return {
-      success: true,
-      data: result,
-      message: 'Organização atualizada com sucesso'
-    };
+    return this.organizationService.updateOrganization(id, dto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(204)
   async delete(@Param('id') id: string) {
-    this.logger.log(`Deletando organização: ${id}`);
     await this.organizationService.deleteOrganization(id);
   }
 }
